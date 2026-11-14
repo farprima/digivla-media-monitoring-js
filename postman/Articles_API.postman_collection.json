@@ -1,0 +1,735 @@
+{
+  "info": {
+    "_postman_id": "02fa2a85-b91c-4ff8-83d3-732890e8121d",
+    "name": "Articles API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "17759191"
+  },
+  "item": [
+    {
+      "name": "Login Admin1",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"status 200\", () => pm.response.to.have.status(200));\npm.collectionVariables.set(\"tokenAdmin1\", pm.response.json().token);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{json_web_token_0778}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"email\": \"admin1@example.com\",\n    \"password\": \"password123\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/auth/login",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "auth",
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "List articles",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status 200\", () => {\n    pm.response.to.have.status(200);\n});\n\nconst body = pm.response.json();\n\npm.test(\"data adalah array\", () => \n{\n    pm.expect(body.data).to.be.an(\"array\");\n});\n\npm.test(\"Maksimal 10 artikel\", () => {\n    pm.expect(body.data.length).to.be.at.most(10);\n});\n\npm.test(\"tiap artikel punya field wajib\", () => {\n    body.data.forEach((a) => {\n        pm.expect(a).to.include.keys(\"id\", \"organization_id\", \"title\", \"content\", \"source\", \"author\", \"sentiment\", \"published_at\");\n    });\n});\n\npm.test(\"tiap artikel punya url\", () => {\n    body.data.forEach((a) => {\n        pm.expect(a).to.have.property(\"url\")\n    });\n});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{tokenAdmin1}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/articles?page=1&limit=20&sentiment=NEGATIVE&source=kompas.com",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "articles"
+          ],
+          "query": [
+            {
+              "key": "page",
+              "value": "1"
+            },
+            {
+              "key": "limit",
+              "value": "20"
+            },
+            {
+              "key": "sentiment",
+              "value": "NEGATIVE"
+            },
+            {
+              "key": "source",
+              "value": "kompas.com"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "List articles different organization",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status 200\", () => {\n    pm.response.to.have.status(200);\n});\n\nconst body = pm.response.json();\n\npm.test(\"isi kosong\", () => \n{\n    pm.expect(body.data).to.be.eql([]);\n});\n\npm.test(\"totalItems 0\", () => pm.expect(body.pagination.totalItems).to.be.eql(0));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{tokenAdmin1}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/articles?search=pemilu&page=1&limit=5",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "articles"
+          ],
+          "query": [
+            {
+              "key": "search",
+              "value": "pemilu"
+            },
+            {
+              "key": "page",
+              "value": "1"
+            },
+            {
+              "key": "limit",
+              "value": "5"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Login Admin2",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"status 200\", () => pm.response.to.have.status(200));\npm.collectionVariables.set(\"tokenAdmin2\", pm.response.json().token)"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"email\": \"admin2@example.com\",\n    \"password\": \"password123\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/auth/login",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "auth",
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Detail article",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status 200\", () => {\n    pm.response.to.have.status(200);\n});\n\nconst body = pm.response.json();\n\npm.test(\"id sesuai\", () => {\n    pm.expect(body.data.id).to.eql(3);\n});\n\npm.test(\"punya url\", () => {\n    pm.expect(body.data).to.have.property(\"url\");\n});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{tokenAdmin2}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/articles/3",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "articles",
+            "3"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Detail article different organization",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status 404\", () => {\n    pm.response.to.have.status(404);\n});\n\npm.test(\"ada pesan error\", () => {\n    pm.expect(pm.response.json()).to.have.property(\"error\");\n});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{tokenAdmin2}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/articles/1",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "articles",
+            "1"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Detail article not found",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"status 404\", () => {\n    pm.response.to.have.status(404);\n});\n\npm.test(\"ada pesan error\", () => {\n    pm.expect(pm.response.json()).to.have.property(\"error\");\n});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{tokenAdmin2}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/articles/{{articleId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "articles",
+            "{{articleId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Login Admin1",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"status 200\", () => pm.response.to.have.status(200));\npm.collectionVariables.set(\"tokenAdmin1\", pm.response.json().token);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{json_web_token_0778}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"email\": \"admin1@example.com\",\n    \"password\": \"password123\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/auth/login",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "auth",
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create article",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"status 201\", () => {\n    pm.response.to.have.status(201);\n});\n\nconst body = pm.response.json();\n\npm.test(\"ada id\", () => {\n    pm.expect(body.data).to.have.property(\"id\");\n});\n\npm.test(\"title sesuai\", () => {\n    pm.expect(body.data.title).to.be.eql(\"Test artikel\");\n});\n\npm.test(\"url sesuai\", () => {\n    pm.expect(body.data.url).to.be.eql(\"https://example.com/test\");\n});\n\npm.collectionVariables.set(\"articleId\", pm.response.json().data.id);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{tokenAdmin1}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"organization_id\": 1,\n    \"title\": \"Test artikel\",\n    \"content\": \"Isi artikel test\",\n    \"url\": \"https://example.com/test\",\n    \"source\": \"detik\",\n    \"sentiment\": \"neutral\",\n    \"published_at\": \"2026-11-13T13:00:00+07:00\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/articles",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "articles"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create article invalid sentiment",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"status 400\", () => {\n    pm.response.to.have.status(400);\n});\n\npm.test(\"ada pesan error\", () => {\n    pm.expect(pm.response.json()).to.have.property(\"error\")\n});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{tokenAdmin1}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"organization_id\": 1,\n    \"title\": \"Test artikel\",\n    \"content\": \"Isi artikel test\",\n    \"url\": \"https://example.com/test\",\n    \"source\": \"detik\",\n    \"sentiment\": \"medium\",\n    \"published_at\": \"2026-11-13T13:00:00+07:00\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/articles",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "articles"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create article null sentiment",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"status 400\", () => {\n    pm.response.to.have.status(400);\n});\n\npm.test(\"ada pesan error\", () => {\n    pm.expect(pm.response.json()).to.have.property(\"error\")\n});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{tokenAdmin1}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"organization_id\": 1,\n    \"title\": \"Test artikel\",\n    \"content\": \"Isi artikel test\",\n    \"url\": \"https://example.com/test\",\n    \"source\": \"detik\",\n    \"published_at\": \"2026-11-13T13:00:00+07:00\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/articles",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "articles"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Update article",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"status 200\", () => pm.response.to.have.status(200));\n\nconst body = pm.response.json();\npm.test(\"id tetap 2\", () => pm.expect(body.data.id).to.be.eql(2));\npm.test(\"title berubah\", () => pm.expect(body.data.title).to.be.eql(\"Rupiah menguat banget\"));\npm.test(\"updated_at ada\", () => pm.expect(body.data).to.have.property(\"updated_at\"));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{tokenAdmin1}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"id\": 2,\n    \"organization_id\": 1,\n    \"title\": \"Rupiah menguat banget\",\n    \"content\": \"Rupiah ditutup menguat terhadap dolar AS.\",\n    \"url\": \"https://detik.com/b\",\n    \"source\": \"detik\",\n    \"author\": null,\n    \"sentiment\": \"positive\",\n    \"published_at\": \"2026-11-05T15:30:00+07:00\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/articles/2",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "articles",
+            "2"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Update article without title",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"status 400\", () => pm.response.to.have.status(400));\n\npm.test(\"ada error\", () => {\n    const body = pm.response.json();\n    pm.expect(body.error).to.eql(\"Validation failed\");\n    pm.expect(body.details).to.include(\"title is required\");\n})"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{tokenAdmin1}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"id\": 2,\n    \"organization_id\": 1,\n    \"content\": \"Rupiah ditutup menguat terhadap dolar AS.\",\n    \"url\": \"https://detik.com/b\",\n    \"source\": \"detik\",\n    \"author\": null,\n    \"sentiment\": \"positive\",\n    \"published_at\": \"2026-11-05T15:30:00+07:00\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/articles/2",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "articles",
+            "2"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Delete article",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"204 status\", () => pm.response.to.have.status(204));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{tokenAdmin1}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/articles/{{articleId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "articles",
+            "{{articleId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Delete article not found",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"status 404\", () => pm.response.to.have.status(404));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{tokenAdmin1}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/articles/9999",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "articles",
+            "9999"
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": ""
+    },
+    {
+      "key": "articleId",
+      "value": ""
+    },
+    {
+      "key": "token",
+      "secret": true
+    },
+    {
+      "key": "json_web_token_0778",
+      "secret": true
+    },
+    {
+      "key": "tokenAdmin1",
+      "value": ""
+    },
+    {
+      "key": "tokenAdmin2",
+      "value": ""
+    }
+  ]
+}
