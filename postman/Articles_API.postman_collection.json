@@ -21,14 +21,7 @@
       ],
       "request": {
         "auth": {
-          "type": "bearer",
-          "bearer": [
-            {
-              "key": "token",
-              "value": "{{json_web_token_0778}}",
-              "type": "string"
-            }
-          ]
+          "type": "noauth"
         },
         "method": "POST",
         "header": [],
@@ -63,7 +56,7 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test(\"Status 200\", () => {\n    pm.response.to.have.status(200);\n});\n\nconst body = pm.response.json();\n\npm.test(\"data adalah array\", () => \n{\n    pm.expect(body.data).to.be.an(\"array\");\n});\n\npm.test(\"Maksimal 10 artikel\", () => {\n    pm.expect(body.data.length).to.be.at.most(10);\n});\n\npm.test(\"tiap artikel punya field wajib\", () => {\n    body.data.forEach((a) => {\n        pm.expect(a).to.include.keys(\"id\", \"organization_id\", \"title\", \"content\", \"source\", \"author\", \"sentiment\", \"published_at\");\n    });\n});\n\npm.test(\"tiap artikel punya url\", () => {\n    body.data.forEach((a) => {\n        pm.expect(a).to.have.property(\"url\")\n    });\n});"
+              "pm.test(\"Status 200\", () => {\n    pm.response.to.have.status(200);\n});\n\nconst body = pm.response.json();\n\npm.test(\"data adalah array\", () => \n{\n    pm.expect(body.data).to.be.an(\"array\");\n});\n\npm.test(\"Maksimal 20 artikel (sesuai limit)\", () => {\n    pm.expect(body.data.length).to.be.at.most(20);\n});\n\npm.test(\"tiap artikel punya field wajib\", () => {\n    body.data.forEach((a) => {\n        pm.expect(a).to.include.keys(\"id\", \"organization_id\", \"title\", \"content\", \"source\", \"author\", \"sentiment\", \"published_at\");\n    });\n});\n\npm.test(\"tiap artikel punya url\", () => {\n    body.data.forEach((a) => {\n        pm.expect(a).to.have.property(\"url\")\n    });\n});"
             ]
           }
         }
@@ -311,14 +304,14 @@
         "method": "GET",
         "header": [],
         "url": {
-          "raw": "{{baseUrl}}/api/articles/{{articleId}}",
+          "raw": "{{baseUrl}}/api/articles/999999",
           "host": [
             "{{baseUrl}}"
           ],
           "path": [
             "api",
             "articles",
-            "{{articleId}}"
+            "999999"
           ]
         }
       },
@@ -339,14 +332,7 @@
       ],
       "request": {
         "auth": {
-          "type": "bearer",
-          "bearer": [
-            {
-              "key": "token",
-              "value": "{{json_web_token_0778}}",
-              "type": "string"
-            }
-          ]
+          "type": "noauth"
         },
         "method": "POST",
         "header": [],
@@ -696,32 +682,14 @@
       "response": []
     }
   ],
-  "auth": {
-    "type": "bearer",
-    "bearer": [
-      {
-        "key": "token",
-        "value": "",
-        "type": "string"
-      }
-    ]
-  },
   "variable": [
     {
       "key": "baseUrl",
-      "value": ""
+      "value": "http://localhost:3000"
     },
     {
       "key": "articleId",
       "value": ""
-    },
-    {
-      "key": "token",
-      "secret": true
-    },
-    {
-      "key": "json_web_token_0778",
-      "secret": true
     },
     {
       "key": "tokenAdmin1",
