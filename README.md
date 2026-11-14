@@ -10,8 +10,8 @@ Dibuat untuk Case Study Digivla Soal 1 (dengan catatan performa untuk Soal 2).
 | --- | --- |
 | Database migration / schema | [`schema.sql`](schema.sql), data awal di [`seed.sql`](seed.sql) |
 | ERD | [ERD](#erd), sumbernya [`schema.dbml`](schema.dbml) |
-| Dokumentasi API | [Daftar endpoint](#daftar-endpoint) dan Postman collection di `postman/` |
-| Automated test | Test di Postman collection, lihat [Automated test](#dokumentasi-api-dan-automated-test) |
+| Dokumentasi API | [Daftar endpoint](#daftar-endpoint) dan Postman collection [`postman/Articles_API.postman_collection.json`](postman/Articles_API.postman_collection.json) |
+| Automated test | Test di Postman collection yang sama, lihat [Automated test](#dokumentasi-api-dan-automated-test) |
 | Architecture diagram | [Arsitektur](#arsitektur) |
 | Daftar endpoint | [Daftar endpoint](#daftar-endpoint) |
 
@@ -36,7 +36,8 @@ Dibuat untuk Case Study Digivla Soal 1 (dengan catatan performa untuk Soal 2).
 ├── schema.sql                # tabel dan index
 ├── seed.sql                  # data awal untuk development
 ├── schema.dbml               # sumber ERD untuk dbdiagram.io
-├── postman/                  # export Postman collection (TODO)
+├── postman/
+│   └── Articles_API.postman_collection.json   # dokumentasi API + automated test
 ├── .env.example              # salin ke .env (.env tidak di-commit)
 └── package.json
 ```
@@ -47,45 +48,47 @@ Kebutuhan: Node.js dan PostgreSQL.
 
 ```bash
 npm install
-cp .env.example .env          # lalu isi nilainya
-psql -f schema.sql            # TODO: tambahkan flag koneksi / nama database
-psql -f seed.sql
-npm start                     # atau: node app.js (TODO: cek script npm)
+cp .env.example .env                              # lalu isi DATABASE_URL dan JWT_SECRET
+set -a; . ./.env; set +a                          # muat isi .env ke shell
+psql "$DATABASE_URL" -f schema.sql -f seed.sql
+npm start                                         # atau npm run dev untuk auto-reload
 ```
 
 Server berjalan di port **3000**.
+
+`schema.sql` menghapus tabel lama dulu (`DROP TABLE IF EXISTS`), jadi perintah `psql` di atas juga dipakai untuk mereset data ke kondisi seed.
 
 ### Environment variable
 
 | Variabel | Keterangan |
 | --- | --- |
+| `DATABASE_URL` | Connection string PostgreSQL yang dipakai `db.js`, misalnya `postgresql://user:password@localhost:5432/media_intelligence` |
 | `JWT_SECRET` | Secret untuk menandatangani dan memverifikasi JWT |
-| TODO | Variabel koneksi database yang dipakai `db.js` (misalnya `DATABASE_URL` atau `PGHOST`, `PGUSER`, `PGPASSWORD`, `PGDATABASE`, `PGPORT`) |
 
 ## Database schema
 
 ### organizations
 
-TODO: cek daftar kolom lengkap.
-
-| Kolom | Keterangan |
-| --- | --- |
-| `id` | primary key |
-| `name` | |
-| `status` | misalnya active |
+| Kolom | Tipe | Constraint |
+| --- | --- | --- |
+| `id` | `SERIAL` | primary key |
+| `name` | `TEXT` | `NOT NULL` |
+| `status` | `TEXT` | `NOT NULL DEFAULT 'active'` |
+| `created_at` | `TIMESTAMPTZ` | `NOT NULL DEFAULT now()` |
+| `updated_at` | `TIMESTAMPTZ` | `NOT NULL DEFAULT now()` |
 
 ### users
 
-TODO: cek daftar kolom lengkap.
-
-| Kolom | Keterangan |
-| --- | --- |
-| `id` | primary key |
-| `organization_id` | FK ke `organizations(id)` |
-| `name` | |
-| `email` | |
-| `password` | hash bcrypt |
-| `role` | `admin` atau `user` |
+| Kolom | Tipe | Constraint |
+| --- | --- | --- |
+| `id` | `SERIAL` | primary key |
+| `organization_id` | `INT` | `NOT NULL`, FK ke `organizations(id)` |
+| `name` | `TEXT` | `NOT NULL` |
+| `email` | `TEXT` | `NOT NULL UNIQUE` |
+| `password_hash` | `TEXT` | `NOT NULL`, hash bcrypt |
+| `role` | `TEXT` | `NOT NULL DEFAULT 'user'`, isinya `admin` atau `user` |
+| `created_at` | `TIMESTAMPTZ` | `NOT NULL DEFAULT now()` |
+| `updated_at` | `TIMESTAMPTZ` | `NOT NULL DEFAULT now()` |
 
 ### articles
 
@@ -126,16 +129,20 @@ erDiagram
     organizations {
         int id PK
         text name
-        text status
+        text status "default active"
+        timestamptz created_at
+        timestamptz updated_at
     }
 
     users {
         int id PK
         int organization_id FK
         text name
-        text email
-        text password "hash bcrypt"
+        text email UK
+        text password_hash "hash bcrypt"
         text role "admin atau user"
+        timestamptz created_at
+        timestamptz updated_at
     }
 
     articles {
@@ -176,13 +183,13 @@ flowchart LR
 
 ### Akun seed (khusus development)
 
-| Akun | Organisasi | Role | Password |
+| Email | Organisasi | Role | Password |
 | --- | --- | --- | --- |
-| admin1 | 1 | admin | `password123` |
-| user1 | 1 | user | `password123` |
-| admin2 | 2 | admin | `password123` |
+| `admin1@example.com` | 1 (Digivla) | admin | `password123` |
+| `user1@example.com` | 1 (Digivla) | user | `password123` |
+| `admin2@example.com` | 2 (Klien B) | admin | `password123` |
 
-TODO: cek field login (username atau email) dan nilai pastinya.
+Login dengan body `{ "email": "...", "password": "..." }`.
 
 ## Daftar endpoint
 
@@ -292,15 +299,19 @@ Alasannya:
 
 ## Dokumentasi API dan automated test
 
-Postman collection **Articles API** mendokumentasikan semua endpoint sekaligus berisi automated test. TODO: export ke `postman/`.
+Postman collection [`postman/Articles_API.postman_collection.json`](postman/Articles_API.postman_collection.json) mendokumentasikan semua endpoint sekaligus berisi automated test: 15 request dan 34 assertion.
 
-Jalankan dengan Postman Collection Runner, atau dengan newman:
+Jalankan dengan Postman (import file collection, lalu buka Collection Runner), atau dengan newman:
 
 ```bash
-npx newman run postman/<collection>.json   # TODO: nama file
+npx newman run postman/Articles_API.postman_collection.json
 ```
 
-Setiap request mengatur header `Authorization` sendiri dengan token per akun (`tokenAdmin1`, dan seterusnya), supaya saat runner berjalan berurutan token satu akun tidak menimpa token akun lain.
+- Variable `baseUrl` default-nya `http://localhost:3000`. Untuk server di alamat lain, tambahkan `--env-var baseUrl=http://host:port`.
+- Test memakai data dari `seed.sql` (misalnya artikel id 3 milik organisasi 2), jadi jalankan di database yang sudah di-seed.
+- Collection bisa dijalankan berulang kali: artikel yang dibuat di tengah run dihapus lagi di akhir run.
+
+Setiap request mengatur header `Authorization` sendiri dengan token per akun (`tokenAdmin1`, `tokenAdmin2`), supaya saat runner berjalan berurutan token satu akun tidak menimpa token akun lain.
 
 Sudah dites:
 
