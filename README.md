@@ -1,98 +1,98 @@
 # Digivla Media Monitoring - Articles API
 
-Articles API for a **Media Intelligence Monitoring** platform. It is multi-tenant: every organization can only see and manage its own articles.
+Articles API untuk platform **Media Intelligence Monitoring**. Aplikasinya multi-tenant: setiap organisasi hanya bisa melihat dan mengelola artikelnya sendiri.
 
-Built for Digivla Case Study, Question 1 (with performance notes for Question 2).
+Dibuat untuk Case Study Digivla Soal 1 (dengan catatan performa untuk Soal 2).
 
 ## Deliverables
 
-| Deliverable | Where |
+| Deliverable | Lokasi |
 | --- | --- |
-| Database migration / schema | [`schema.sql`](schema.sql), seed data in [`seed.sql`](seed.sql) |
-| ERD | [ERD](#erd), source in [`schema.dbml`](schema.dbml) |
-| API documentation | [Endpoints](#endpoints) and the Postman collection in `postman/` |
-| Automated tests | Postman collection tests, see [Automated tests](#api-documentation-and-automated-tests) |
-| Architecture diagram | [Architecture](#architecture) |
-| Endpoint list | [Endpoints](#endpoints) |
+| Database migration / schema | [`schema.sql`](schema.sql), data awal di [`seed.sql`](seed.sql) |
+| ERD | [ERD](#erd), sumbernya [`schema.dbml`](schema.dbml) |
+| Dokumentasi API | [Daftar endpoint](#daftar-endpoint) dan Postman collection di `postman/` |
+| Automated test | Test di Postman collection, lihat [Automated test](#dokumentasi-api-dan-automated-test) |
+| Architecture diagram | [Arsitektur](#arsitektur) |
+| Daftar endpoint | [Daftar endpoint](#daftar-endpoint) |
 
 ## Tech stack
 
 - Node.js, Express (CommonJS)
-- PostgreSQL via `pg`
-- `bcrypt` for password hashing, `jsonwebtoken` for JWT
-- Postman for API documentation and automated tests
+- PostgreSQL dengan library `pg`
+- `bcrypt` untuk hash password, `jsonwebtoken` untuk JWT
+- Postman untuk dokumentasi API dan automated test
 
-## Project structure
+## Struktur project
 
 ```
 .
-├── app.js                    # Express app: all /api/articles routes, validateArticle, parseId
-├── db.js                     # PostgreSQL connection (pg)
+├── app.js                    # Express app: semua route /api/articles, validateArticle, parseId
+├── db.js                     # koneksi PostgreSQL (pg)
 ├── src/
 │   ├── middleware/
-│   │   └── auth.js           # authenticate and authorize
+│   │   └── auth.js           # authenticate dan authorize
 │   └── routes/
 │       └── authRoutes.js     # POST /api/auth/login
-├── schema.sql                # tables and indexes
-├── seed.sql                  # development seed data
-├── schema.dbml               # ERD source for dbdiagram.io
-├── postman/                  # Postman collection export (TODO)
-├── .env.example              # copy to .env (.env is not committed)
+├── schema.sql                # tabel dan index
+├── seed.sql                  # data awal untuk development
+├── schema.dbml               # sumber ERD untuk dbdiagram.io
+├── postman/                  # export Postman collection (TODO)
+├── .env.example              # salin ke .env (.env tidak di-commit)
 └── package.json
 ```
 
-## Getting started
+## Cara menjalankan
 
-Requirements: Node.js and PostgreSQL.
+Kebutuhan: Node.js dan PostgreSQL.
 
 ```bash
 npm install
-cp .env.example .env          # then fill in the values
-psql -f schema.sql            # TODO: add the connection flags / database name
+cp .env.example .env          # lalu isi nilainya
+psql -f schema.sql            # TODO: tambahkan flag koneksi / nama database
 psql -f seed.sql
-npm start                     # or: node app.js (TODO: check the npm script)
+npm start                     # atau: node app.js (TODO: cek script npm)
 ```
 
-The server listens on port **3000**.
+Server berjalan di port **3000**.
 
-### Environment variables
+### Environment variable
 
-| Variable | Description |
+| Variabel | Keterangan |
 | --- | --- |
-| `JWT_SECRET` | Secret used to sign and verify JWTs |
-| TODO | Database connection variables used in `db.js` (e.g. `DATABASE_URL` or `PGHOST`, `PGUSER`, `PGPASSWORD`, `PGDATABASE`, `PGPORT`) |
+| `JWT_SECRET` | Secret untuk menandatangani dan memverifikasi JWT |
+| TODO | Variabel koneksi database yang dipakai `db.js` (misalnya `DATABASE_URL` atau `PGHOST`, `PGUSER`, `PGPASSWORD`, `PGDATABASE`, `PGPORT`) |
 
 ## Database schema
 
 ### organizations
 
-TODO: check the full column list.
+TODO: cek daftar kolom lengkap.
 
-| Column | Notes |
+| Kolom | Keterangan |
 | --- | --- |
 | `id` | primary key |
 | `name` | |
-| `status` | e.g. active |
+| `status` | misalnya active |
 
 ### users
 
-TODO: check the full column list.
+TODO: cek daftar kolom lengkap.
 
-| Column | Notes |
+| Kolom | Keterangan |
 | --- | --- |
 | `id` | primary key |
-| `organization_id` | FK to `organizations(id)` |
+| `organization_id` | FK ke `organizations(id)` |
 | `name` | |
 | `email` | |
-| `password` | bcrypt hash |
-| `role` | `admin` or `user` |
+| `password` | hash bcrypt |
+| `role` | `admin` atau `user` |
 
 ### articles
 
-| Column | Type | Constraints |
+| Kolom | Tipe | Constraint |
 | --- | --- | --- |
 | `id` | `SERIAL` | primary key |
-| `organization_id` | `INT` | `NOT NULL`, FK to `organizations(id)` |
+| `organization_id` | `INT` | `NOT NULL`, FK ke `organizations(id)` |
 | `title` | `TEXT` | `NOT NULL` |
 | `content` | `TEXT` | `NOT NULL` |
 | `url` | `TEXT` | |
@@ -102,7 +102,7 @@ TODO: check the full column list.
 | `published_at` | `TIMESTAMPTZ` | `NOT NULL` |
 | `created_at` | `TIMESTAMPTZ` | `NOT NULL DEFAULT now()` |
 | `updated_at` | `TIMESTAMPTZ` | `NOT NULL DEFAULT now()` |
-| `deleted_at` | `TIMESTAMPTZ` | soft delete marker |
+| `deleted_at` | `TIMESTAMPTZ` | penanda soft delete |
 
 Index:
 
@@ -112,11 +112,11 @@ CREATE INDEX idx_articles_org_sentiment_source_published
   WHERE deleted_at IS NULL;
 ```
 
-Relations: one organization has many users, and one organization has many articles.
+Relasi: satu organisasi punya banyak users, dan satu organisasi punya banyak articles.
 
 ## ERD
 
-The source is [`schema.dbml`](schema.dbml), which can be opened at [dbdiagram.io](https://dbdiagram.io).
+Sumbernya [`schema.dbml`](schema.dbml), yang bisa dibuka di [dbdiagram.io](https://dbdiagram.io).
 
 ```mermaid
 erDiagram
@@ -134,8 +134,8 @@ erDiagram
         int organization_id FK
         text name
         text email
-        text password "bcrypt hash"
-        text role "admin or user"
+        text password "hash bcrypt"
+        text role "admin atau user"
     }
 
     articles {
@@ -154,69 +154,69 @@ erDiagram
     }
 ```
 
-## Architecture
+## Arsitektur
 
 ```mermaid
 flowchart LR
     C[Client / Postman] -->|HTTP + Bearer JWT| A[Express app.js]
-    A --> M[authenticate + authorize middleware]
-    M --> R[Articles routes + validation]
+    A --> M[middleware authenticate + authorize]
+    M --> R[Route articles + validasi]
     R --> DB[(PostgreSQL)]
     C -->|POST /api/auth/login| L[authRoutes.js]
     L -->|bcrypt compare, sign JWT| DB
 ```
 
-## Authentication and authorization
+## Authentication dan authorization
 
-- `POST /api/auth/login` returns a JWT. Payload: `id`, `organization_id`, `role`.
-- Every `/api/articles` request needs the header `Authorization: Bearer <token>`.
-- `organization_id` always comes from the token, never from the request body.
-- `POST`, `PUT` and `DELETE` are admin only (`authorize('admin')`). The `user` role is read only.
-- An article that belongs to another organization returns `404`, so the API does not reveal that it exists.
+- `POST /api/auth/login` mengembalikan JWT. Payload-nya: `id`, `organization_id`, `role`.
+- Semua request ke `/api/articles` wajib membawa header `Authorization: Bearer <token>`.
+- `organization_id` selalu diambil dari token, tidak pernah dari request body.
+- `POST`, `PUT`, dan `DELETE` hanya untuk admin (`authorize('admin')`). Role `user` hanya bisa membaca.
+- Artikel milik organisasi lain mengembalikan `404`, jadi API tidak membocorkan bahwa artikel itu ada.
 
-### Seed accounts (development only)
+### Akun seed (khusus development)
 
-| Account | Organization | Role | Password |
+| Akun | Organisasi | Role | Password |
 | --- | --- | --- | --- |
 | admin1 | 1 | admin | `password123` |
 | user1 | 1 | user | `password123` |
 | admin2 | 2 | admin | `password123` |
 
-TODO: check the login field (username or email) and the exact values.
+TODO: cek field login (username atau email) dan nilai pastinya.
 
-## Endpoints
+## Daftar endpoint
 
-| Method | Path | Description | Success | Access |
+| Method | Path | Keterangan | Sukses | Akses |
 | --- | --- | --- | --- | --- |
-| POST | `/api/auth/login` | Log in and get a JWT | 200 | Public |
-| GET | `/api/articles` | List with pagination, search, filters and sorting | 200 | All roles |
-| GET | `/api/articles/:id` | Article detail | 200 | All roles |
-| POST | `/api/articles` | Create an article | 201 | Admin |
-| PUT | `/api/articles/:id` | Full replace (all fields required) | 200 | Admin |
+| POST | `/api/auth/login` | Login dan mendapatkan JWT | 200 | Public |
+| GET | `/api/articles` | List dengan pagination, search, filter, dan sorting | 200 | Semua role |
+| GET | `/api/articles/:id` | Detail artikel | 200 | Semua role |
+| POST | `/api/articles` | Membuat artikel | 201 | Admin |
+| PUT | `/api/articles/:id` | Full replace (semua field wajib) | 200 | Admin |
 | DELETE | `/api/articles/:id` | Soft delete | 204 | Admin |
 
-### Query parameters for `GET /api/articles`
+### Query parameter `GET /api/articles`
 
-| Parameter | Description |
+| Parameter | Keterangan |
 | --- | --- |
-| `page` | Default 1, minimum 1 |
-| `limit` | Default 10, maximum 100 |
-| `search` | `ILIKE` on `title` or `content` |
-| `sentiment` | Exact match, case-insensitive (input is normalized to lowercase) |
-| `source` | Exact match, case-insensitive (input is normalized to lowercase) |
-| `startPublish`, `endPublish` | Range on `published_at` |
+| `page` | Default 1, minimal 1 |
+| `limit` | Default 10, maksimal 100 |
+| `search` | `ILIKE` pada `title` atau `content` |
+| `sentiment` | Exact match, case-insensitive (input dinormalisasi ke lowercase) |
+| `source` | Exact match, case-insensitive (input dinormalisasi ke lowercase) |
+| `startPublish`, `endPublish` | Rentang `published_at` |
 | `sortBy` | Whitelist: `published_at`, `created_at`, `updated_at`, `title`, `source` (default `published_at`) |
-| `order` | `asc` or `desc` (default `desc`), tiebreaker `id DESC` |
+| `order` | `asc` atau `desc` (default `desc`), tiebreaker `id DESC` |
 
-All values go through parameterized queries, so user input never ends up in the SQL text.
+Semua nilai dikirim lewat parameterized query, jadi input user tidak pernah masuk ke teks SQL (anti SQL injection).
 
-Example:
+Contoh:
 
 ```
 GET /api/articles?page=1&limit=20&sentiment=NEGATIVE&source=kompas.com
 ```
 
-### Response format
+### Format response
 
 List:
 
@@ -234,7 +234,7 @@ List:
 }
 ```
 
-Detail, create and update:
+Detail, create, dan update:
 
 ```json
 { "data": {} }
@@ -243,111 +243,111 @@ Detail, create and update:
 Error:
 
 ```json
-{ "error": "message" }
+{ "error": "pesan error" }
 ```
 
-Validation error:
+Error validasi:
 
 ```json
 { "error": "Validation failed", "details": ["title is required"] }
 ```
 
-A `500` is always `{ "error": "Internal server error" }`. Error details only go to the server log.
+Response `500` selalu `{ "error": "Internal server error" }`. Detail error hanya ditulis ke log server.
 
-### Validation
+### Validasi
 
-`validateArticle` runs on `POST` and `PUT`:
+`validateArticle` dijalankan pada `POST` dan `PUT`:
 
-- `title`, `content`, `source`, `sentiment` and `published_at` are required.
-- Strings are trimmed. `source` and `sentiment` are normalized to lowercase.
-- `sentiment` must be `positive`, `neutral` or `negative`.
-- `published_at` must be a valid date.
-- `url` and `author` are optional (stored as `null`).
-- TODO: `url` format is not validated yet.
+- `title`, `content`, `source`, `sentiment`, dan `published_at` wajib diisi.
+- String di-trim. `source` dan `sentiment` dinormalisasi ke lowercase.
+- `sentiment` hanya boleh `positive`, `neutral`, atau `negative`.
+- `published_at` harus tanggal yang valid.
+- `url` dan `author` opsional (disimpan sebagai `null`).
+- TODO: format `url` belum divalidasi.
 
-`parseId` validates the `:id` in the URL: it must be a positive integer up to 2^31 - 1, otherwise the API returns `400` with `"Invalid article id"`.
+`parseId` memvalidasi `:id` di URL: harus integer positif dan maksimal 2^31 - 1. Kalau tidak valid, API mengembalikan `400` dengan `"Invalid article id"`.
 
-### Status codes
+### Status code
 
-| Code | When |
+| Kode | Kapan |
 | --- | --- |
 | 200 | OK |
-| 201 | Article created |
-| 204 | Article deleted |
-| 400 | Validation failed or invalid id |
-| 401 | Missing or invalid token |
-| 403 | Not an admin |
-| 404 | Not found, or belongs to another organization |
+| 201 | Artikel berhasil dibuat |
+| 204 | Artikel berhasil dihapus |
+| 400 | Validasi gagal atau id tidak valid |
+| 401 | Token tidak ada atau tidak valid |
+| 403 | Bukan admin |
+| 404 | Tidak ditemukan, atau milik organisasi lain |
 | 500 | Internal server error |
 
 ## Soft delete
 
-`DELETE` sets `deleted_at = NOW()` instead of removing the row, and every query filters on `deleted_at IS NULL`.
+`DELETE` mengisi `deleted_at = NOW()`, bukan menghapus baris, dan semua query memfilter `deleted_at IS NULL`.
 
-Why:
+Alasannya:
 
-- Deleted data can be restored.
-- It leaves an audit trail.
-- Historical data stays available for media monitoring analysis.
+- Data yang terhapus bisa dipulihkan.
+- Ada jejak audit.
+- Data historis tetap bisa dianalisis untuk media monitoring.
 
-## API documentation and automated tests
+## Dokumentasi API dan automated test
 
-The Postman collection **Articles API** documents every endpoint and carries the automated tests. TODO: export it to `postman/`.
+Postman collection **Articles API** mendokumentasikan semua endpoint sekaligus berisi automated test. TODO: export ke `postman/`.
 
-Run it with the Postman Collection Runner, or with newman:
+Jalankan dengan Postman Collection Runner, atau dengan newman:
 
 ```bash
-npx newman run postman/<collection>.json   # TODO: file name
+npx newman run postman/<collection>.json   # TODO: nama file
 ```
 
-Each request sets its own `Authorization` header with a per-account token (`tokenAdmin1`, and so on), so a sequential run never overwrites another account's token.
+Setiap request mengatur header `Authorization` sendiri dengan token per akun (`tokenAdmin1`, dan seterusnya), supaya saat runner berjalan berurutan token satu akun tidak menimpa token akun lain.
 
-Covered:
+Sudah dites:
 
 - Login
 - List articles
-- List from another organization (empty `data`, `totalItems` 0)
-- Article detail
-- Detail from another organization (404)
-- Detail not found (404)
+- List dari organisasi lain (`data` kosong, `totalItems` 0)
+- Detail artikel
+- Detail dari organisasi lain (404)
+- Detail tidak ditemukan (404)
 - Create article (201)
-- Create with invalid sentiment (400)
-- Create with null sentiment (400)
+- Create dengan sentiment tidak valid (400)
+- Create dengan sentiment null (400)
 - Update article
-- Update without title (400 with `details`)
+- Update tanpa title (400 dengan `details`)
 - Delete (204)
-- Delete not found (404)
+- Delete tidak ditemukan (404)
 
-Not covered yet (TODO):
+Belum dites (TODO):
 
-- 401 without a token
-- 403 when a `user` calls `POST`
-- Duplicate article prevention
+- 401 tanpa token
+- 403 saat role `user` memanggil `POST`
+- Pencegahan artikel duplikat
 
-## Performance notes (Question 2)
+## Catatan performa (Soal 2)
 
-Target query, on 5 million articles:
+Query yang dianalisis, pada 5 juta artikel:
 
 ```
 GET /api/articles?sentiment=NEGATIVE&source=kompas.com&page=1&limit=50
 ```
 
-Investigation with `EXPLAIN ANALYZE`:
+Investigasi dengan `EXPLAIN ANALYZE`:
 
-- Without an index, the plan is Seq Scan, then Sort, then Limit.
-- With the composite partial index above (tested with `SET enable_seqscan = off` on a small dataset), it becomes an Index Scan and the Sort step disappears, because the index already returns rows in `published_at DESC, id DESC` order.
-- `sentiment` and `source` are filtered with `=` on lowercase-normalized data (not `ILIKE`), so the B-tree index can be used.
+- Tanpa index, plan-nya Seq Scan, lalu Sort, lalu Limit.
+- Dengan composite partial index di atas (dicoba dengan `SET enable_seqscan = off` pada data kecil), plan-nya menjadi Index Scan dan langkah Sort hilang, karena index sudah mengembalikan baris dalam urutan `published_at DESC, id DESC`.
+- `sentiment` dan `source` difilter dengan `=` pada data yang sudah dinormalisasi lowercase (bukan `ILIKE`), supaya index B-tree bisa dipakai.
 
-Next steps:
+Rencana lanjutan:
 
-- The cost of `COUNT(*)` for `totalItems` on large result sets
-- Keyset pagination for deep pages
-- `pg_trgm` or full-text search (GIN) for `search`
-- Caching
+- Biaya `COUNT(*)` untuk `totalItems` pada hasil yang besar
+- Keyset pagination untuk halaman yang jauh
+- `pg_trgm` atau full-text search (GIN) untuk `search`
+- Cache
 
 ## Roadmap
 
-- Rewrite in TypeScript
-- Validate the `url` format
-- Duplicate prevention: a unique constraint such as `(organization_id, url)`, returning `409`
-- Reject login when the organization is not active
+- Rewrite ke TypeScript
+- Validasi format `url`
+- Pencegahan duplikat: unique constraint misalnya `(organization_id, url)`, mengembalikan `409`
+- Tolak login kalau organisasi tidak active
